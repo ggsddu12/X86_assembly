@@ -1,9 +1,8 @@
+;15 硬盘读写
 [org 0x7c00]  ;程序从0x7c00开始
 
 PIC_M_CMD equ 0x20
 PIC_M_DATA equ 0x21
-
-
 
 mov ax, 3
 int 0x10 ;将显示模式设置为文本
@@ -16,57 +15,104 @@ mov sp, 0x7c00
 
 xchg bx, bx
 
-mov word[8 * 4], clock   ;offset,时钟中断号8，
-mov word[8 * 4 + 2], 0   ;段地址
+mov dx, 0x1f2
+mov al, 1
+out dx, al; 设置扇区数量
+
+mov al, 0
+
+inc dx;0x1f3
+out dx, al;
+
+inc dx;0x1f4
+out dx, al;
+
+inc dx;0x1f5
+out dx, al;
+
+inc dx;0x1f6
+mov al, 0b1110_0000
+out dx, al
+
+
+inc dx;0x1f7
+mov al, 0x20
+out dx,al
+
+.check_read_state:
+    nop
+    nop
+    nop
+
+    in al, dx
+    and al, 0b1000_1000
+    cmp al, 0b0000_1000  ;准备完毕且不繁忙
+    jnz .check_read_state
+
+mov ax, 0x100
+mov es, ax
+mov di, 0
+mov dx, 0x1f0
+
+read_loop:
+    nop
+    nop
+    nop
+    in ax, dx
+    mov[es:di], ax
+    add di, 2
+    cmp di, 512
+    jnz read_loop
 
 xchg bx, bx
-mov al, 0b1111_1110       ;0是打开，1是关闭
-out PIC_M_DATA, al
-
-sti ;中断允许 IF=1
-;cli;
 
 
-loopa:
-    mov bx, 3
-    mov al, 'A'
-    call blink
-    jmp loopa
+mov dx, 0x1f2
+mov al, 1
+out dx, al; 设置扇区数量
 
-clock:
-;     xchg bx, bx
-    push bx
-    push ax
-    mov bx, 4
-    mov al, 'C'
-    call blink
-    mov al, 0x20     
-    out PIC_M_CMD, al ;0x20中断处理完成  
-    pop ax
-    pop bx
-    iret
+mov al, 2
 
-blink:
-     push es
-     push dx 
-     mov dx, 0xb800
-     mov es, dx
+inc dx;0x1f3
+out dx, al;
 
-     shl bx, 1
-     mov dl, [es:bx]
-     cmp dl, ' '
-     jnz .set_space
-     .set_char:
-         mov [es:bx], al
-         jmp .done
-     .set_space:
-         mov byte [es:bx], ' '
-     .done:
-         shr bx, 1
-     
-     pop dx
-     pop es
-     ret
+mov al, 0
 
+inc dx;0x1f4
+out dx, al;
+
+inc dx;0x1f5
+out dx, al;
+
+inc dx;0x1f6
+mov al, 0b1110_0000
+out dx, al
+
+
+inc dx;0x1f7
+mov al, 0x30
+out dx,al
+write_loop:
+    nop
+    nop
+    nop
+    mov ax, [es:di]
+    out dx, ax
+    add di, 2
+    cmp di, 512
+    jnz write_loop
+
+
+mov dx, 0x1f7
+.check_write_state:
+    nop
+    nop
+    nop
+
+    in al, dx
+    and al, 0b1000_0000
+    cmp al, 0b1000_0000  ;准备完毕且不繁忙
+    jz .check_read_state
+jmp $
 times 510 - ($ - $$) db 0
 db 0x55, 0xaa

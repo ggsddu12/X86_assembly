@@ -34,17 +34,80 @@ check_memory:
     
     mov cx, [ards_count]
     mov si, 0
-.show:
-    mov eax, [si+ards_buffer]
-    mov ebx, [si+ards_buffer+8]
-    mov edx, [si+ards_buffer+16]
-    add si, 20
-    xchg bx, bx
-    loop .show
+    jmp prepare_protect_mode
+; .show:
+;     mov eax, [si+ards_buffer]
+;     mov ebx, [si+ards_buffer+8]
+;     mov edx, [si+ards_buffer+16]
+;     add si, 20
+;     xchg bx, bx
+;     loop .show
 .error:
+    mov ax, 0xb800
+    mov es, ax
+    mov byte[es:0],"E"
+    jmp $
 
-jmp $
+prepare_protect_mode:
+    cli ;关中断
+    in al, 0x92
+    or al, 0b10
+    out 0x92, al   ;打开A20线
+    lgdt [gdt_ptr] ;加载GDT
+    mov eax , cr0  ;cr0最低位置1
+    or eax, 1
+    mov cr0, eax
+    jmp word code_selector:protect_enable
+    ud2;出错
 
+
+[bits 32]
+protect_enable:
+    mov ax, data_selector   ;用data_selector初始化其它段寄存器（除CS）
+    mov ds, ax
+    mov es, ax
+    mov ss, ax
+    mov fs, ax
+    mov gs, ax
+
+    mov esp, 10000
+    mov byte [0xb8000], 'P'
+    xchg bx, bx
+
+    mov byte[0x200000], 'P'
+    xchg bx, bx
+
+    jmp $
+
+base equ 0
+limit equ 0xfffff ;20位
+
+code_selector equ (1<<3)          ; index=1(13bit),低三位TI/RPL置0
+data_selector equ (2<<3)          ; index=2
+gdt_ptr: ;GDTR
+    dw ( gdt_end - gdt_base - 1 ) ; limit = size - 1，GDT长度
+    dd gdt_base                   ; base  GDT地址
+
+gdt_base: ;GDT
+    dd 0,0                       ;空 代码段 数据段
+
+gdt_code:                        ;代码段初始化
+    dw limit & 0xffff;
+    dw base & 0xffff
+    db (base>>16)&0xff
+    db 0b1110 | 0b1001_0000
+    db 0b1100_0000 | (limit >> 16)
+    db (base>>24) & 0xff
+
+
+gdt_data:                        ;数据段初始化
+    dw limit & 0xffff;
+    dw base & 0xffff
+    db (base>>16)&0xff
+    db 0b0010 | 0b1001_0000
+    db 0b1100_0000 | (limit >> 16)
+    db (base>>24) & 0xff
+gdt_end:
 
 ards_count:
     dw 0

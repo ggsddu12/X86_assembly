@@ -13,7 +13,7 @@ mov ds, ax
 mov ss, ax
 mov sp, 0x7c00
 
-xchg bx, bx
+; xchg bx, bx
 
 ;从磁盘将loader读到0x1000
 mov edi, 0x1000
@@ -21,7 +21,7 @@ mov ecx, 2
 mov bl, 4
 call read_disk
 
-xchg bx, bx
+; xchg bx, bx
 jmp 0x1000
 
 read_disk:
@@ -61,7 +61,20 @@ read_disk:
     inc dx;0x1f7
     mov al, 0x20
     out dx,al
+    xor ecx, ecx
+    mov cl, bl
 
+.read:
+    push cx
+    call .waits
+    call .reads
+    pop cx
+    loop .read    
+    popad
+    ret
+
+.waits: 
+    mov dx, 0x1f7  
     .check_read_state:
         nop
         nop
@@ -71,15 +84,12 @@ read_disk:
         and al, 0b1000_1000
         cmp al, 0b0000_1000  ;准备完毕且不繁忙
         jnz .check_read_state
+    ret
 
-    xor eax, eax
-    mov al, bl
-    mov dx, 256
-    mul dx; ax = bl * 256
 
+.reads:
     mov dx, 0x1f0
-    mov cx, ax    
-
+    mov cx, 256   
     .read_loop:
         nop
         nop
@@ -89,11 +99,10 @@ read_disk:
         add di, 2
 
         loop .read_loop
-    
-    popad
     ret
+    
 
-xchg bx, bx
+; xchg bx, bx
 
 
 ; mov dx, 0x1f2
@@ -143,5 +152,5 @@ xchg bx, bx
 ;     cmp al, 0b1000_0000  ;准备完毕且不繁忙
 ;     jz .check_read_state
 jmp $
-times 510 - ($ - $$) db 0
+times 510 - ($ - $$) db 1
 db 0x55, 0xaa

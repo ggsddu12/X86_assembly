@@ -159,9 +159,9 @@ gdt_code:                        ;代码段初始化
     dw limit & 0xffff;           ;limit 0-15
     dw base & 0xffff             ; base 0-15
     db (base>>16)&0xff           ; base 16-23  
-    db 0b1110 | 0b1001_0000
-    db 0b1100_0000 | (limit >> 16)
-    db (base>>24) & 0xff
+    db 0b1110 | 0b1001_0000      ; type S DPL P
+    db 0b1100_0000 | (limit >> 16); limit 16 -19
+    db (base>>24) & 0xff         ; base 24-31
 
 
 gdt_data:                        ;数据段初始化

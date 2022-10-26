@@ -15,7 +15,7 @@
 
 ; section .data   
 ;     message db "hello, world!!!", 10,13, 0 ;10 \n   13 \r 
-;     message_end
+;     message_end：
 section .text
 global main
 main:
@@ -31,4 +31,4 @@ main:
     int 0x80
 section .data   
     message db "hello, world!!!", 10,13, 0 ;10 \n   13 \r 
-    message_end
+    message_end:

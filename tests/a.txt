@@ -1,0 +1,90 @@
+ELF Header:
+  Magic:   7f 45 4c 46 01 01 01 03 00 00 00 00 00 00 00 00 
+  Class:                             ELF32
+  Data:                              2's complement, little endian
+  Version:                           1 (current)
+  OS/ABI:                            UNIX - GNU
+  ABI Version:                       0
+  Type:                              EXEC (Executable file)
+  Machine:                           Intel 80386
+  Version:                           0x1
+  Entry point address:               0x8049510
+  Start of program headers:          52 (bytes into file)
+  Start of section headers:          763196 (bytes into file)
+  Flags:                             0x0
+  Size of this header:               52 (bytes)
+  Size of program headers:           32 (bytes)
+  Number of program headers:         9
+  Size of section headers:           40 (bytes)
+  Number of section headers:         38
+  Section header string table index: 37
+
+Section Headers:
+  [Nr] Name              Type            Addr     Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            00000000 000000 000000 00      0   0  0
+  [ 1] .note.gnu.bu[...] NOTE            08048154 000154 000024 00   A  0   0  4
+  [ 2] .note.gnu.pr[...] NOTE            08048178 000178 00001c 00   A  0   0  4
+  [ 3] .note.ABI-tag     NOTE            08048194 000194 000020 00   A  0   0  4
+  [ 4] .rel.plt          REL             080481b4 0001b4 000070 08  AI 35  19  4
+  [ 5] .init             PROGBITS        08049000 001000 000024 00  AX  0   0  4
+  [ 6] .text             PROGBITS        08049030 001030 0704e4 00  AX  0   0 16
+  [ 7] __libc_freeres_fn PROGBITS        080b9520 071520 000be7 00  AX  0   0 16
+  [ 8] .fini             PROGBITS        080ba108 072108 000018 00  AX  0   0  4
+  [ 9] .rodata           PROGBITS        080bb000 073000 01c23c 00   A  0   0 32
+  [10] .stapsdt.base     PROGBITS        080d723c 08f23c 000001 00   A  0   0  1
+  [11] .eh_frame         PROGBITS        080d7240 08f240 013c88 00   A  0   0  4
+  [12] .gcc_except_table PROGBITS        080eaec8 0a2ec8 0000ed 00   A  0   0  1
+  [13] .tdata            PROGBITS        080ebc6c 0a3c6c 00000c 00 WAT  0   0  4
+  [14] .tbss             NOBITS          080ebc78 0a3c78 000024 00 WAT  0   0  4
+  [15] .init_array       INIT_ARRAY      080ebc78 0a3c78 000004 04  WA  0   0  4
+  [16] .fini_array       FINI_ARRAY      080ebc7c 0a3c7c 000004 04  WA  0   0  4
+  [17] .data.rel.ro      PROGBITS        080ebc80 0a3c80 0022f4 00  WA  0   0 32
+  [18] .got              PROGBITS        080edf74 0a5f74 00007c 00  WA  0   0  4
+  [19] .got.plt          PROGBITS        080edff4 0a5ff4 00000c 04  WA  0   0  4
+  [20] .data             PROGBITS        080ee000 0a6000 000ebc 00  WA  0   0 32
+  [21] __libc_subfreeres PROGBITS        080eeebc 0a6ebc 000024 00 WAR  0   0  4
+  [22] __libc_IO_vtables PROGBITS        080eeee0 0a6ee0 0003b4 00  WA  0   0 32
+  [23] __libc_atexit     PROGBITS        080ef294 0a7294 000004 00 WAR  0   0  4
+  [24] .bss              NOBITS          080ef2a0 0a7298 002ec0 00  WA  0   0 32
+  [25] __libc_freer[...] NOBITS          080f2160 0a7298 000010 00  WA  0   0  4
+  [26] .comment          PROGBITS        00000000 0a7298 000012 01  MS  0   0  1
+  [27] .note.stapsdt     NOTE            00000000 0a72ac 0012dc 00      0   0  4
+  [28] .debug_aranges    PROGBITS        00000000 0a8588 0000c8 00      0   0  8
+  [29] .debug_info       PROGBITS        00000000 0a8650 000966 00      0   0  1
+  [30] .debug_abbrev     PROGBITS        00000000 0a8fb6 00029c 00      0   0  1
+  [31] .debug_line       PROGBITS        00000000 0a9252 000253 00      0   0  1
+  [32] .debug_str        PROGBITS        00000000 0a94a5 0004b1 01  MS  0   0  1
+  [33] .debug_line_str   PROGBITS        00000000 0a9956 000151 01  MS  0   0  1
+  [34] .debug_rnglists   PROGBITS        00000000 0a9aa7 000038 00      0   0  1
+  [35] .symtab           SYMTAB          00000000 0a9ae0 009740 10     36 1249  4
+  [36] .strtab           STRTAB          00000000 0b3220 007163 00      0   0  1
+  [37] .shstrtab         STRTAB          00000000 0ba383 0001b6 00      0   0  1
+Key to Flags:
+  W (write), A (alloc), X (execute), M (merge), S (strings), I (info),
+  L (link order), O (extra OS processing required), G (group), T (TLS),
+  C (compressed), x (unknown), o (OS specific), E (exclude),
+  R (retain), D (mbind), p (processor specific)
+
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  LOAD           0x000000 0x08048000 0x08048000 0x00224 0x00224 R   0x1000
+  LOAD           0x001000 0x08049000 0x08049000 0x71120 0x71120 R E 0x1000
+  LOAD           0x073000 0x080bb000 0x080bb000 0x2ffb5 0x2ffb5 R   0x1000
+  LOAD           0x0a3c6c 0x080ebc6c 0x080ebc6c 0x0362c 0x06504 RW  0x1000
+  NOTE           0x000154 0x08048154 0x08048154 0x00060 0x00060 R   0x4
+  TLS            0x0a3c6c 0x080ebc6c 0x080ebc6c 0x0000c 0x00030 R   0x4
+  GNU_PROPERTY   0x000178 0x08048178 0x08048178 0x0001c 0x0001c R   0x4
+  GNU_STACK      0x000000 0x00000000 0x00000000 0x00000 0x00000 RW  0x10
+  GNU_RELRO      0x0a3c6c 0x080ebc6c 0x080ebc6c 0x02394 0x02394 R   0x1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .note.gnu.build-id .note.gnu.property .note.ABI-tag .rel.plt 
+   01     .init .text __libc_freeres_fn .fini 
+   02     .rodata .stapsdt.base .eh_frame .gcc_except_table 
+   03     .tdata .init_array .fini_array .data.rel.ro .got .got.plt .data __libc_subfreeres __libc_IO_vtables __libc_atexit .bss __libc_freeres_ptrs 
+   04     .note.gnu.build-id .note.gnu.property .note.ABI-tag 
+   05     .tdata .tbss 
+   06     .note.gnu.property 
+   07     
+   08     .tdata .init_array .fini_array .data.rel.ro .got .got.plt 

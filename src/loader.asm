@@ -63,25 +63,84 @@ prepare_protect_mode:
 
 [bits 32]
 protect_enable:
-    xchg bx, bx
     mov ax, data_selector   ;用data_selector初始化其它段寄存器（除CS）
     mov ds, ax
     mov es, ax
     mov ss, ax
     mov fs, ax
     mov gs, ax
+    
+    xchg bx, bx 
 
-    mov esp, 10000
-    mov ax, test_selector
-    mov gs, ax
-    mov word [gs:0], 0x55aa
-    ; mov byte [0xb8000], 'P'
-    xchg bx, bx
-
-    ; mov byte[0x200000], 'P'
+    call setup_page
+    mov byte[0xc00b8000],'P'
+    ; mov esp, 10000
+    ; mov ax, test_selector
+    ; mov gs, ax
+    ; mov word [gs:0], 0x55aa
+    ; ; mov byte [0xb8000], 'P'
     ; xchg bx, bx
 
+    ; ; mov byte[0x200000], 'P'
+    ; ; xchg bx, bx
+    xchg bx, bx 
     jmp $
+
+PDE equ 0x2000 ;页目录表起始地址，页目录共占4KB 2^12 = 10000 0000 0000 =0x1000，后面紧挨着页表
+PTE equ 0x3000 ;页表起始地址
+ATTR equ 0b11
+
+
+setup_page:
+    mov eax, PDE
+    call .clear_page
+    mov eax, PTE
+    call .clear_page
+    ;前1M映射
+    ;前1M映射到0xC0000000 -> 0xC0100000
+    mov eax, PTE
+    or eax, ATTR
+    mov [PDE], eax        ;0b_(00000_00000)_(00000_00011)_(00000_00000_11)
+                               ;index PDE    ;index PTE =3   ;页内偏移  = 3
+    mov [PDE+ 0x300* 4], eax ;0b_11000_00000_00000_00000_00000_00000_00 = 0xC0000000
+                          ;index PDE=0x11_0000_0000 = 0x300
+
+    mov eax, PDE
+    or eax, ATTR
+    ;页目录共有1024个，2^10=100 0000 0000 = 0x400 即编号为 0 - 0x3ff
+    mov [PDE + 0x3ff * 4], eax;最后一个页目录项指向页目录开头
+           
+    ;将页表项结构装入页表
+    mov ebx, PTE            ;页表
+    mov ecx, (0x100000 / 0x1000);内存前1M共256个页
+    mov esi, 0              ;页索引
+.next_page:
+    mov eax, esi            
+    shl eax, 12             ;高20位放页基址，低12位清0
+    or eax, ATTR            ;低12位置属性
+    mov [ebx+esi*4], eax
+    inc esi
+    loop .next_page
+    
+    mov eax, PDE
+    mov cr3, eax
+
+    mov eax, cr0
+    or eax, 0b1000_0000_0000_0000_0000_0000_0000_0000
+    mov cr0, eax
+    ret
+
+
+.clear_page:
+    ;清空eax开始的4K内存，全部置0 
+    mov ecx, 0x1000  ;4K
+    mov esi, 0
+.set:
+    mov byte[eax+esi],0
+    inc esi
+    loop.set
+    ret 
+
 
 base equ 0        ;32位
 limit equ 0xfffff ;20位

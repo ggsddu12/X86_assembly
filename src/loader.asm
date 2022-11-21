@@ -83,8 +83,13 @@ protect_enable:
 
     ; ; mov byte[0x200000], 'P'
     ; ; xchg bx, bx
-    xchg bx, bx 
+    ; xchg bx, bx 
     jmp $
+
+;一页的大小为4K=0x1000,PDE刚好位于第二页，PTE从第三页开始
+;问题实际上转化为给出一个32位线性地址，使其映射到物理地址刚好位于PDE处，0x2000
+;页目录指示第一张页表位于0x3000 0x3000/0x1000=3,PDE[0]的高20位索引为3 0x00003_000
+;页表的第一页指向物理地址开头0x0 PTE[0]的高20位索引为0
 
 PDE equ 0x2000 ;页目录表起始地址，页目录共占4KB 2^12 = 10000 0000 0000 =0x1000，后面紧挨着页表
 PTE equ 0x3000 ;页表起始地址
@@ -96,34 +101,36 @@ setup_page:
     call .clear_page
     mov eax, PTE
     call .clear_page
-    ;前1M映射
-    ;前1M映射到0xC0000000 -> 0xC0100000
-    mov eax, PTE
-    or eax, ATTR
-    mov [PDE], eax        ;0b_(00000_00000)_(00000_00011)_(00000_00000_11)
-                               ;index PDE    ;index PTE =3   ;页内偏移  = 3
-    mov [PDE+ 0x300* 4], eax ;0b_11000_00000_00000_00000_00000_00000_00 = 0xC0000000
-                          ;index PDE=0x11_0000_0000 = 0x300
-
+    ;前1M映射到前1M
+    ;前1M映射到0xC0000000 -> 0xC0100000 linux内核从0xC0000000开始
+    mov eax, PTE          
+    or eax, ATTR          ;eax=0b_0000_0000_0000_0000_0011_0000_0000_0011 = 0x00003_003
+    xchg bx, bx
+    
+    ;前1M映射到前1M
+    mov [PDE], eax        ;0b_(0000000000_0000000011)_(000000000011) PDE[0]=PTE
+    ;前1M映射到0xC0000000 - 0xC0100000                      
+    mov [PDE+ 0x300* 4], eax ; 0xC0000000 = 0b 1100_0000_00 00_0000_0000_0000_0000_0000
+                                              ;3  0  0                
     mov eax, PDE
     or eax, ATTR
     ;页目录共有1024个，2^10=100 0000 0000 = 0x400 即编号为 0 - 0x3ff
-    mov [PDE + 0x3ff * 4], eax;最后一个页目录项指向页目录开头
-           
+    mov [PDE + 0x3ff * 4], eax;最后一个页目录项指向页目录开头,浪费掉一个页目录项，导致最高端的4M无法访问
+                              
     ;将页表项结构装入页表
     mov ebx, PTE            ;页表
-    mov ecx, (0x100000 / 0x1000);内存前1M共256个页
-    mov esi, 0              ;页索引
+    mov ecx, (0x100000 / 0x1000);内存前1M占256个页
+    mov esi, 0              ;页索引 i
 .next_page:
     mov eax, esi            
     shl eax, 12             ;高20位放页基址，低12位清0
     or eax, ATTR            ;低12位置属性
-    mov [ebx+esi*4], eax
+    mov [ebx+esi*4], eax    ;PTE[i]= (i<<12) | 0b11
     inc esi
     loop .next_page
     
     mov eax, PDE
-    mov cr3, eax
+    mov cr3, eax            ;cr3装入页目录地址
 
     mov eax, cr0
     or eax, 0b1000_0000_0000_0000_0000_0000_0000_0000
